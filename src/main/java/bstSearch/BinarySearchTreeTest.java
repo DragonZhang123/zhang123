@@ -1,12 +1,15 @@
+/*
 package bstSearch;
 
 import org.junit.Before;
 import org.junit.Test;
 
 
+*/
 /**
  * Created by zhangguanlong on 2017/12/14.
- */
+ *//*
+
 public class BinarySearchTreeTest {
 
     BinarySearchTree binarySearchTree;
@@ -68,3 +71,4 @@ public class BinarySearchTreeTest {
     }
 
 }
+*/

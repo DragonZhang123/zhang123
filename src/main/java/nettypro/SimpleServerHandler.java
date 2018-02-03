@@ -20,6 +20,7 @@ public class SimpleServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if(msg instanceof ByteBuf){
+            //打印 传输 al。。。
             System.out.println(((ByteBuf) msg).toString(Charset.defaultCharset()));
         }
         ctx.writeAndFlush("is ok");
