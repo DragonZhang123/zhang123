@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="Martial">
+    <output-path>$PROJECT_DIR$/out/artifacts/Martial</output-path>
+    <properties id="ant-preprocessing">
+      <options enabled="true" />
+    </properties>
+    <root id="root">
+      <element id="module-output" name="Martial" />
+    </root>
+  </artifact>
+</component>
