@@ -163,7 +163,6 @@ public class BinarySearchTree {
 
         //如果待删除的节点有两个子节点
         else if (current.left != null && current.right != null) {
-
             //寻找右子树中的最小值
             Node successor = getSuccessor(current);
             if (current == root) {

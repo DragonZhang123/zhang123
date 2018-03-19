@@ -1,8 +1,11 @@
-package com.fengrun.mvcframework.servlet;
+package main.java.fengrun.mvcframework.servlet;
 
 
-import com.fengrun.mvcframework.annotation.NBController;
-import com.fengrun.mvcframework.annotation.NBService;
+
+import main.java.fengrun.mvcframework.annotation.NBAutowried;
+import main.java.fengrun.mvcframework.annotation.NBController;
+import main.java.fengrun.mvcframework.annotation.NBRequestMapping;
+import main.java.fengrun.mvcframework.annotation.NBService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -12,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 
@@ -23,6 +28,7 @@ public class NBDispatcherServlet extends HttpServlet {
     Properties properties = new Properties();
     private List<String> classNames = new ArrayList<>();
     private Map<String,Object> ioc = new HashMap<>();
+    private Map<String,Method> handlerMapping = new HashMap<>();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -30,10 +36,11 @@ public class NBDispatcherServlet extends HttpServlet {
         String application = config.getInitParameter("contextConfigLocation");
         System.out.println("application=" +application);
         //
-        initStrategies(application);
+//        initStrategies(application);
         //1加载配置文件 applacation.XMl
-        doLoadConfig( application);
+        doLoadConfig(application);
         //2扫描配置文件中描述的类
+        System.out.println(properties.getProperty("scanPackage"));
         doScanner(properties.getProperty("scanPackage"));
         //3实例化所有被扫描到的类，放到ioc容器
         doInstance();
@@ -57,8 +64,8 @@ public class NBDispatcherServlet extends HttpServlet {
     }
 
     private void doLoadConfig(String location) {
+        System.out.println("location is :"+location);
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(location);
-
         try {
             properties.load(inputStream);
         } catch (IOException e) {
@@ -76,13 +83,59 @@ public class NBDispatcherServlet extends HttpServlet {
     }
 
     private void initHandlerMapping() {
+        System.out.println(ioc);
+        if (ioc.isEmpty()) return;
+        for (String string : classNames) {
+            for (Map.Entry<String, Object> entry : ioc.entrySet()) {
+                Class<?> clazz = entry.getValue().getClass();
+                if (!clazz.isAnnotationPresent(NBController.class)){
+                    continue;
+                }
+                String url = "";
+                if (clazz.isAnnotationPresent(NBRequestMapping.class)){
+                    NBRequestMapping requestMapping = clazz.getAnnotation(NBRequestMapping.class);
+                    url = requestMapping.value();
+                }
+                Method[] methods = clazz.getMethods();
+                for (Method method : methods) {
+                    if (!clazz.isAnnotationPresent(NBRequestMapping.class)){
+                        continue;
+                    }
+                    NBRequestMapping requestMapping = method.getAnnotation(NBRequestMapping.class);
+                    String mapping =("/"+url+"/"+requestMapping.value()).replaceAll("/+","/");
+                    handlerMapping.put(mapping,method);
+                    System.out.println("put "+mapping+","+method);
+
+
+                }
+            }
+        }
     }
 
     private void doAutoWried() {
         if (ioc.isEmpty()) return;
         for (Map.Entry<String, Object> entry : ioc.entrySet()) {
+            System.out.print(entry.getKey()+"____________");
             System.out.println(entry.getValue());
+            Field[] fields = entry.getValue().getClass().getDeclaredFields();//找出suoyouziduan
+            for (Field field : fields) {
+                if (!field.isAnnotationPresent(NBAutowried.class)){ continue; }
+                NBAutowried autowried = field.getAnnotation(NBAutowried.class);
+                String beanName = autowried.value().trim();
+                if ("".equals(beanName)){
+                    beanName = field.getType().getName();
+                }
+                //private 强制注入
+                field.setAccessible(true);
+                //赋值
+                try {
+                    field.set(entry.getValue(),ioc.get(beanName));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
+
     }
     //实例化
     private void doInstance() {
@@ -104,13 +157,17 @@ public class NBDispatcherServlet extends HttpServlet {
 
 
                     NBService service = clazz.getAnnotation(NBService.class);
-                    String beanName = service.value();
+                    String beanName = service.value();//自己顶的名字
                     if("".equals(beanName.trim())){
                          beanName = lowerFirst(clazz.getSimpleName());
                         ioc.put(beanName,clazz.newInstance());
                     }else {
                         ioc.put(beanName,clazz.newInstance());
                         continue;
+                    }
+                    Class<?>[] interfaces = clazz.getInterfaces();
+                    for (Class<?> i : interfaces) {
+                        ioc.put(i.getName(),clazz.newInstance());
                     }
                 }else {
                     continue;
@@ -131,7 +188,7 @@ public class NBDispatcherServlet extends HttpServlet {
     //递归扫描
     private void doScanner(String packageName) {
         URL url = this.getClass().getClassLoader().getResource("/"+packageName.replaceAll("\\.","/"));
-        File dir = new File(url.getFile());
+        File dir = new File(url.getFile().replace("%20"," "));//目录空格的字符
         for (File file:dir.listFiles()) {
             if (file.isDirectory()){
                 doScanner(packageName+"."+file.getName());
@@ -167,10 +224,21 @@ public class NBDispatcherServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doDispacher();
+        doDispacher(req,resp);
     }
 
-    private void doDispacher() {
+    private void doDispacher(HttpServletRequest req, HttpServletResponse resp) {
+        if(handlerMapping.isEmpty()){return;}
+        StringBuffer requestURL = req.getRequestURL();
+        String contextPath = req.getContextPath();
+//        Method method = handlerMapping.get(requestURL);
+        String url = requestURL.toString();
+        url = url.replace(contextPath, "").replaceAll("/+", "/");
+        Method method = handlerMapping.get(url);
+        System.out.println(url+" , "+method);
+        //这特么找不到beanName 不知道那个类的方法咋调用
+//        method.invoke()   - ,-
+
     }
 
 
