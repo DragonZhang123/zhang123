@@ -239,6 +239,13 @@ public class NBDispatcherServlet extends HttpServlet {
         //这特么找不到beanName 不知道那个类的方法咋调用
 //        method.invoke()   - ,-
 
+     /*   try {
+            Class<?> cls = Class.forName("main.java.fengrun.demo.mvc.action.DemoAction");
+            method.invoke(cls,null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+
     }
 
 
