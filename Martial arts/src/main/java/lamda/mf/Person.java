@@ -1,6 +1,7 @@
 package lamda.mf;
 
-import org.jetbrains.annotations.NotNull;
+import com.sun.istack.internal.NotNull;
+
 
 public class Person implements Comparable<Person>{
     private String name;
@@ -25,7 +26,7 @@ public class Person implements Comparable<Person>{
     }
 
     @Override
-    public int compareTo(@NotNull Person o) {
+    public int compareTo( Person o) {
         return o.getName().compareTo(this.getName());
     }
 }

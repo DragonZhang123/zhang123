@@ -1,6 +1,6 @@
 package nettypro;
 
-import io.netty.bootstrap.ServerBootstrap;
+/*import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -14,9 +14,9 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringEncoder;
 
-/**
+*//**
  * Created by zhang on 2018/2/2.
- */
+ *//*
 public class NettyServer {
     public static void main(String[] args) throws InterruptedException {
         ServerBootstrap server = new ServerBootstrap();
@@ -47,4 +47,4 @@ public class NettyServer {
         channelFuture.channel().closeFuture().sync();
 
     }
-}
+}*/

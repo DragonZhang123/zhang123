@@ -103,6 +103,7 @@ public class NBDispatcherServlet extends HttpServlet {
                     //依赖注入的接口怎么实例化？？  接口key 实例 其实现类 那个
 
 
+
                     NBService service = clazz.getAnnotation(NBService.class);
                     String beanName = service.value();
                     if("".equals(beanName.trim())){

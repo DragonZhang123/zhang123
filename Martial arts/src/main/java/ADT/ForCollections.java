@@ -14,4 +14,5 @@ public class ForCollections {
 
     }
     SpecialList list = new SpecialList();
+
 }

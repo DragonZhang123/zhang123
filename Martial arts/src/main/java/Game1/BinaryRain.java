@@ -255,6 +255,7 @@ public class BinaryRain extends JDialog {
     /**
      * 重写setVisible方法，当不显示时停止创建文字雨
      */
+    @Override
     public void setVisible(boolean flag) {
 
         super.setVisible(flag);
